@@ -96,14 +96,30 @@ for sector in index_metadata["Sector"].unique():
     temp_sector_data = normalized_data[sector_companies].sum(axis=1)
     sector_data[sector] = temp_sector_data
 
+sector_data["Date"] = normalized_data["Date"]
+
+# Get the last value of the stocks for each day
+unique_date_value = sector_data["Date"].unique()
+sector_day_data = {}
+for date in unique_date_value:
+    temp_data = sector_data[sector_data["Date"] == date]
+    sector_day_data[date] = temp_data.iloc[-1]
+sector_day_data = pd.DataFrame(sector_day_data)
+sector_day_data = sector_day_data.T
+
+today = sector_day_data["Date"].iloc[-1]
+sector_day_data = sector_day_data.drop(columns=["Date"])
+sector_data = sector_data.drop(columns=["Date"])
 
 with st.container(key="sector_container"):
     # Most impacted sector from last 60 data points
 
-    sector_list_col, sector_graph_col = st.columns([1, 3])
+    sector_list_col, sector_graph_col = st.columns([1.3, 3.2])
 
-    lasthour_close_sector_data_diff = (sector_data.iloc[-1] - sector_data.iloc[-60]).rename("60 min")    
-    sector_list_col.dataframe(lasthour_close_sector_data_diff.to_frame().style.background_gradient(cmap='RdYlGn', vmin=-0.4, vmax=0.4), height=500)
+    lasthour_close_sector_data_diff = (sector_data.iloc[-1] - sector_data.iloc[-60]).rename("60 min")
+    lastday_sector_data_diff = (sector_day_data.iloc[-1] - sector_day_data.iloc[-2]).rename(today)
+    sector_trend_df = pd.concat([lastday_sector_data_diff, lasthour_close_sector_data_diff], axis=1)
+    sector_list_col.dataframe(sector_trend_df.style.background_gradient(axis=None, cmap='RdYlGn', vmin=-0.4, vmax=0.4), height=500)
 
     # User selection of the stock
     sectors_selected = sector_graph_col.multiselect("Select a Sector", options=sector_data.columns, default=["Semiconductors"])
@@ -151,31 +167,31 @@ with st.container(key="stock_container"):
     stock_day_impact_col.markdown("#### Daily Impact")
 
     stock_col1, stock_col2, stock_col3, stock_col4 = stock_day_impact_col.columns(4, gap="small")
-    stock_col1.markdown("**Most 🟢 Impact**")
+    stock_col1.markdown("**Most $ 🟢**")
     stock_col1.dataframe(day_close_data_diff, height=200)
 
-    stock_col2.markdown("**Least 🔻 Impact**")
+    stock_col2.markdown("**Least $ 🔻**")
     stock_col2.dataframe(day_close_data_diff[::-1], height=200)
 
-    stock_col3.markdown("**Most % 🟢 Impact**")
+    stock_col3.markdown("**Most % 🟢**")
     stock_col3.dataframe(day_close_data_percentagediff, height=200)
 
-    stock_col4.markdown("**Least % 🔻 Impact**")
+    stock_col4.markdown("**Least % 🔻**")
     stock_col4.dataframe(day_close_data_percentagediff[::-1], height=200)
 
     stock_hour_impact_col.markdown("#### Hourly Impact")
 
     stock_col5, stock_col6, stock_col7, stock_col8 = stock_hour_impact_col.columns(4, gap="small")
-    stock_col5.markdown("**Most 🟢 Impact**")
+    stock_col5.markdown("**Most $ 🟢**")
     stock_col5.dataframe(lasthour_close_data_diff, height=200)
 
-    stock_col6.markdown("**Least 🔻 Impact**")
+    stock_col6.markdown("**Least $ 🔻**")
     stock_col6.dataframe(lasthour_close_data_diff[::-1], height=200)
 
-    stock_col7.markdown("**Most % 🟢 Impact**")
+    stock_col7.markdown("**Most % 🟢**")
     stock_col7.dataframe(lasthour_close_data_percentagediff, height=200)
 
-    stock_col8.markdown("**Least % 🔻 Impact**")
+    stock_col8.markdown("**Least % 🔻**")
     stock_col8.dataframe(lasthour_close_data_percentagediff[::-1], height=200)
 
 # -------------------------
