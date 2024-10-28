@@ -85,6 +85,37 @@ st.plotly_chart(fig)
 
 
 # -------------------------
+# Show the impact of a sector on the INDEX
+# -------------------------
+
+# Find the sector wise accumulated data
+
+sector_data = pd.DataFrame()
+for sector in index_metadata["Sector"].unique():
+    sector_companies = index_metadata[index_metadata["Sector"] == sector][INDEX+" Company"].values
+    temp_sector_data = normalized_data[sector_companies].sum(axis=1)
+    sector_data[sector] = temp_sector_data
+
+
+with st.container(key="sector_container"):
+    # Most impacted sector from last 60 data points
+
+    sector_list_col, sector_graph_col = st.columns([1, 3])
+
+    lasthour_close_sector_data_diff = (sector_data.iloc[-1] - sector_data.iloc[-60]).rename("60 min")    
+    sector_list_col.dataframe(lasthour_close_sector_data_diff.to_frame().style.background_gradient(cmap='RdYlGn', vmin=-0.4, vmax=0.4), height=500)
+
+    # User selection of the stock
+    sectors_selected = sector_graph_col.multiselect("Select a Sector", options=sector_data.columns, default=["Semiconductors"])
+    # Filter data based on selection
+    selected_stock_data = sector_data[sectors_selected]
+    # Plot the data
+    fig = px.line(selected_stock_data)
+    # Display the plot
+    sector_graph_col.plotly_chart(fig)
+
+
+# -------------------------
 # order the stock with the highest movement for the last day
 # -------------------------
 day_close_data_diff = day_close_data.diff().drop(columns=[INDEX, "Normalized "+INDEX])
@@ -117,7 +148,7 @@ with st.container(key="stock_container"):
 
     stock_day_impact_col, stock_hour_impact_col = st.columns(2, gap="small")
 
-    stock_day_impact_col.markdown("### Daily Impact")
+    stock_day_impact_col.markdown("#### Daily Impact")
 
     stock_col1, stock_col2, stock_col3, stock_col4 = stock_day_impact_col.columns(4, gap="small")
     stock_col1.markdown("**Most 🟢 Impact**")
@@ -132,7 +163,7 @@ with st.container(key="stock_container"):
     stock_col4.markdown("**Least % 🔻 Impact**")
     stock_col4.dataframe(day_close_data_percentagediff[::-1], height=200)
 
-    stock_hour_impact_col.markdown("### Hourly Impact")
+    stock_hour_impact_col.markdown("#### Hourly Impact")
 
     stock_col5, stock_col6, stock_col7, stock_col8 = stock_hour_impact_col.columns(4, gap="small")
     stock_col5.markdown("**Most 🟢 Impact**")
@@ -150,5 +181,3 @@ with st.container(key="stock_container"):
 # -------------------------
 # display the data in a table
 # -------------------------
-st.write("Data for the last 5 days")
-st.write(lasthour_close_data_diff)
