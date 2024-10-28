@@ -39,6 +39,8 @@ index_metadata = pd.DataFrame()
 if response.status_code == 200:
     index_metadata = response.json()
     index_metadata = pd.DataFrame(index_metadata)
+    # sort by the Index weight
+    index_metadata = index_metadata.sort_values(by=INDEX+ " Weight", ascending=False)
 else:
     st.write("Error fetching data from the API")
 
@@ -71,7 +73,7 @@ index_day_close_data = index_day_close_data.diff().iloc[-1]
 index_day_close_data = round(index_day_close_data, 3)
 
 st.markdown(f"# {INDEX} Index - {latest_index} {'🟢' if index_day_close_data > 0 else '🔻'} (Today: ${index_day_close_data})")
-st.write(f"This page provides insights into the {INDEX} index and companies/sectors that make up the index. The data is from yahoo finance and is updated every 15 minutes.")
+st.write(f"This page provides insights into the {INDEX} index and companies/sectors that make up the index. The data is from yahoo finance and is updated with little lag atleast 3 min. You should referesh the page to get the latest available information.")
 # -------------------------
 # display a graph with only "INDEX", "Normalized INDEX" data and autofit the y scale
 # -------------------------
@@ -155,6 +157,7 @@ lasthour_close_data_diff = lasthour_close_data_diff.sort_values(ascending=False)
 lasthour_close_data_percentagediff = lasthour_close_data_percentagediff.drop(index=[INDEX, "Normalized "+INDEX])
 lasthour_close_data_percentagediff = lasthour_close_data_percentagediff.sort_values(ascending=False)
 
+index_metadata_top20 = index_metadata.head(20)
 
 # -------------------------
 # Create a columns of information about the stocks
@@ -164,7 +167,12 @@ with st.container(key="stock_container"):
 
     stock_day_impact_col, stock_hour_impact_col = st.columns(2, gap="small")
 
-    stock_day_impact_col.markdown("#### Daily Impact")
+    total_elements = len(day_close_data_diff)
+    positive_elements = len(day_close_data_diff[day_close_data_diff > 0])
+    day_close_data_diff_top20 = day_close_data_diff.loc[day_close_data_diff.index.isin(index_metadata_top20[INDEX+" Company"])]
+    positive_elements_top20 = len(day_close_data_diff_top20[day_close_data_diff_top20 > 0])
+
+    stock_day_impact_col.markdown(f"#### Daily Impact:")
 
     stock_col1, stock_col2, stock_col3, stock_col4 = stock_day_impact_col.columns(4, gap="small")
     stock_col1.markdown("**Most $ 🟢**")
@@ -179,7 +187,15 @@ with st.container(key="stock_container"):
     stock_col4.markdown("**Least % 🔻**")
     stock_col4.dataframe(day_close_data_percentagediff[::-1], height=200)
 
-    stock_hour_impact_col.markdown("#### Hourly Impact")
+    stock_day_impact_col.write(f"**Note**: Out of the total companies in the index, **{positive_elements}** companies had a positive impact on the index today and **{total_elements-positive_elements}** companies had a negative impact on the index today.")
+    stock_day_impact_col.write(f"**Note**: Out of the top 20 companies in the index, **{positive_elements_top20}** companies had a positive impact on the index today and **{20-positive_elements_top20}** companies had a negative impact on the index today.")
+
+    total_elements = len(lasthour_close_data_diff)
+    positive_elements = len(lasthour_close_data_diff[lasthour_close_data_diff > 0])
+    lasthour_close_data_diff_top20 = lasthour_close_data_diff.loc[lasthour_close_data_diff.index.isin(index_metadata_top20[INDEX+" Company"])]
+    positive_elements_top20 = len(lasthour_close_data_diff_top20[lasthour_close_data_diff_top20 > 0])
+
+    stock_hour_impact_col.markdown(f"#### Hourly Impact:")
 
     stock_col5, stock_col6, stock_col7, stock_col8 = stock_hour_impact_col.columns(4, gap="small")
     stock_col5.markdown("**Most $ 🟢**")
@@ -193,6 +209,9 @@ with st.container(key="stock_container"):
 
     stock_col8.markdown("**Least % 🔻**")
     stock_col8.dataframe(lasthour_close_data_percentagediff[::-1], height=200)
+
+    stock_hour_impact_col.write(f"**Note**: Out of the total companies in the index, **{positive_elements}** companies had a positive impact on the index in the last 60 minutes and **{total_elements-positive_elements}** companies had a negative impact on the index in the last 60 minutes.")
+    stock_hour_impact_col.write(f"**Note**: Out of the top 20 companies in the index, **{positive_elements_top20}** companies had a positive impact on the index in the last 60 minutes and **{20-positive_elements_top20}** companies had a negative impact on the index in the last 60 minutes.")
 
 # -------------------------
 # display the data in a table
