@@ -1,22 +1,20 @@
 import streamlit as st
 
-mainPage = st.Page(
-    page="pages/1_mainpage.py",
-    title="Main page",
-    icon="🚀",
-    default=True
-    )
-
 indexSPY = st.Page(
     page="pages/2_index_spy.py",
     title="Index SPY",
     icon="📈"
     )
 
+indexQQQ = st.Page(
+    page="pages/3_index_qqq.py",
+    title="Index QQQ",
+    icon="📈"
+    )
+
 pg = st.navigation(
     {   
-        "About": [mainPage],
-        "Index": [indexSPY],
+        "Index": [indexSPY, indexQQQ]
     }
     )
 pg.run()
