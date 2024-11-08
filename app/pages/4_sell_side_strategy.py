@@ -35,17 +35,17 @@ st.write("The Sell Side Options Strategy is a strategy that involves selling opt
 
 momentum_data.rename(columns={"Recent Momentum": "Peak Swing (%)", "Current Momentum": "Current Swing (%)", "Peak": "Peak ($)", "Recent Volume": "Current Vol.", "Median Volume": "Median Vol.", "Average Volume": "Avg Vol."}, inplace=True)
 
-# -------------------------
-# Show the Stocks that had strong momentum and recently slowed down
-# -------------------------
 
-st.write("#### Stocks that had strong Swing and recently slowed down")
+with st.container(key="momentume_data"):
 
-with st.container(key="slowed_momentume_data"):
+    slowed_momentum_col1, full_momentum_col1 = st.columns([1, 1])
+
+    # -------------------------
+    # Show the Stocks that had slowed and continued strong momentum recently
+    # -------------------------
+
     # filter the data to show only stocks that had strong momentum and recently
-
-    slowed_momentum_col1, slowed_momentum_col2 = st.columns([1, 1])
-
+    slowed_momentum_col1.write("#### Momentum Stocks that had recently slowed down")
     slowed_momentum_stocks = momentum_data[momentum_data["Settled"]]
     slowed_momentum_stocks = slowed_momentum_stocks.drop(columns=["Settled", "Settled Duration", "Unsettled"])
 
@@ -60,17 +60,11 @@ with st.container(key="slowed_momentume_data"):
 
     slowed_momentum_col1.dataframe(slowed_momentum_stocks)
 
+    # -------------------------
+    # Show the Stocks that had strong momentum and yet to slow down
+    # -------------------------
 
-# -------------------------
-# Show the Stocks that had strong momentum and yet to slow down
-# -------------------------
-
-st.write("#### Stocks that had strong swing and yet to slow down")
-
-with st.container(key="full_momentume_data"):
-    # filter the data to show only stocks that had strong momentum and yet to slow down
-
-    full_momentum_col1, full_momentum_col2 = st.columns([1, 1])
+    full_momentum_col1.write("#### Momentum Stocks that continues strong momentum")
 
     full_momentum_stocks = momentum_data[momentum_data["Unsettled"]]
     full_momentum_stocks = full_momentum_stocks.drop(columns=["Settled", "Settled Duration", "Unsettled"])
@@ -80,3 +74,5 @@ with st.container(key="full_momentume_data"):
     full_momentum_stocks = full_momentum_stocks.sort_values(by="Swing Percentage %", ascending=False).drop(columns=["Swing Percentage %"])
 
     full_momentum_col1.dataframe(full_momentum_stocks)
+
+
