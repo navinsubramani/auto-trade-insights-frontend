@@ -8,8 +8,8 @@ import io
 st.set_page_config(layout="wide")
 
 # read the data from a REST api
-# BASE_URL = "https://backendservice-987-ea412ce0-q85m2kos.onporter.run/"
-BASE_URL = "http://127.0.0.1:8000/"
+BASE_URL = "https://backendservice-987-ea412ce0-q85m2kos.onporter.run/"
+# BASE_URL = "http://127.0.0.1:8000/"
 
 # Get the normalized data for INDEX
 url = "{BASE_URL}stockmomentumdata"
