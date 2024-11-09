@@ -18,10 +18,17 @@ sellSideStrategy = st.Page(
     icon="📉"
     )
 
+spiderSemiAndTech = st.Page(
+    page="pages/6_spider_tech_and_semi.py",
+    title="Semi and Tech Sector Web",
+    icon="🕷"
+    )
+
 pg = st.navigation(
     {   
         "Index": [indexSPY, indexQQQ],
-        "Options": [sellSideStrategy]
+        "Options": [sellSideStrategy],
+        "Spider Web": [spiderSemiAndTech]
     }
     )
 pg.run()
